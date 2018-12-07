@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Printing env...
+      - env
+      - echo Logging in to Amazon ECR...
+      - $(aws ecr get-login --no-include-email --region $AWS_DEFAULT_REGION)
+  build:
+    commands:
+      - echo Build started on `date`
+      - echo Building greeter image...          
+      - cd $CODEBUILD_SRC_DIR/greeter
+      - docker build -t greeter:latest .
+      - docker tag greeter:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/greeter:$CODEBUILD_SOURCE_VERSION
+      - echo Building greeting image...          
+      - cd $CODEBUILD_SRC_DIR/greeting
+      - docker build -t greeting:latest .
+      - docker tag greeting:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/greeting:$CODEBUILD_SOURCE_VERSION
+      - echo Building name image...          
+      - cd $CODEBUILD_SRC_DIR/name
+      - docker build -t name:latest .
+      - docker tag name:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/name:$CODEBUILD_SOURCE_VERSION
+  post_build:
+    commands:
+      - echo Build completed on `date`
+      - echo Pushing the Docker images...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/greeter:$CODEBUILD_SOURCE_VERSION
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/greeting:$CODEBUILD_SOURCE_VERSION
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/name:$CODEBUILD_SOURCE_VERSION
