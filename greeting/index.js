@@ -6,10 +6,7 @@ const os = require('os');
 const hostname = os.hostname();
 
 var greetings = [
-  'Hey',
-  'Hi',
-  'Hello',
-  'Greetings'
+  'Hello'
 ];
 
 app.get('*', function(req, res) {
